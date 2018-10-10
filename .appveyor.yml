@@ -1,0 +1,41 @@
+version: '{build}'
+
+image: Visual Studio 2017
+
+cache:
+  - nim-0.19.0_x64.zip
+  - nim-0.19.0_x32.zip
+
+matrix:
+  fast_finish: true
+
+environment:
+  matrix:
+    - NIM_URL: https://nim-lang.org/download/nim-0.19.0_x64.zip
+      NIM_ARCHIVE: nim-0.19.0_x64.zip
+      platform: x64
+    - NIM_URL: https://nim-lang.org/download/nim-0.19.0_x32.zip
+      NIM_ARCHIVE: nim-0.19.0_x32.zip
+      platform: x86
+
+install:
+  - IF not exist "%NIM_ARCHIVE%" appveyor DownloadFile "%NIM_URL%" -FileName "%NIM_ARCHIVE%"
+  - 7z x -y "%NIM_ARCHIVE%" -o"%CD%"> nul
+
+build_script:
+  - ps: |
+      if ($PLATFORM -eq "x64") { 
+        $ARCH="amd64" 
+      } else { 
+        $ARCH="i386" 
+      }
+      pushd "C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\Community\\VC\\Auxiliary\\Build"
+      cmd /c "vcvarsall.bat $env:PLATFORM & set" |
+      foreach {
+        if ($_ -match "=") {
+          $v = $_.split("="); set-item -force -path "ENV:\$($v[0])"  -value "$($v[1])"
+        }
+      }
+      popd
+      $env:Path += ((Convert-Path .) + "\nim-0.19.0\bin");
+      .\nim-0.19.0\bin\nim.exe c --cc:vcc --verbosity:0 -r coro.nim
