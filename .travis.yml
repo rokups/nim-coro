@@ -10,8 +10,9 @@ os:
   - osx
 matrix:
   fast_finish: true
-  allow_failures:
+  exclude:
     - os: osx
+      env: ARCH=i386
 install:
   - |
     if [[ $TRAVIS_OS_NAME == 'linux' ]];

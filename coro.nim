@@ -150,9 +150,10 @@ elif defined(posix):
         var
             MAP_ANONYMOUS {.importc: "MAP_ANONYMOUS", header: "<sys/mman.h>".}: cint
             MAP_PRIVATE {.importc: "MAP_PRIVATE", header: "<sys/mman.h>".}: cint
+            SC_PAGESIZE {.importc: "_SC_PAGESIZE", header: "<unistd.h>".}: cint
 
     const minimalStackSize* = 32768
-    proc getPageSize: int = sysconf(30)
+    proc getPageSize: int = sysconf(SC_PAGESIZE)
     proc getMaxSize: int =
         var limit: RLimit
         discard getrlimit(3, limit)
