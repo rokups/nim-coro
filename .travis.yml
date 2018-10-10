@@ -11,10 +11,13 @@ os:
 matrix:
   fast_finish: true
   allow_failures:
-    - env: ARCH=i386
     - os: osx
 install:
   - |
+    if [[ $TRAVIS_OS_NAME == 'linux' ]];
+    then
+      if [ `uname -m` = x86_64 ]; then sudo apt-get install -qq --force-yes gcc-multilib > /dev/null; fi
+    fi
     export BRANCH=master
     if [ ! -x nim-$BRANCH/bin/nim ]; then
       git clone -b $BRANCH --depth 1 git://github.com/nim-lang/nim nim-$BRANCH/
@@ -38,7 +41,12 @@ install:
 before_script:
     - export PATH="nim-$BRANCH/bin${PATH:+:$PATH}"
 script:
-    - nim c --cc:$CC --cpu:$ARCH --verbosity:0 -r coro.nim
+    - |
+      if [[ "$ARCH" == "i386" ]];
+      then
+        extra_args="--passC=-m32 --passL=-m32"
+      fi
+      nim c --cc:$CC --cpu:$ARCH --verbosity:0 $extra_args -r coro.nim
 cache:
   directories:
     - nim-master
