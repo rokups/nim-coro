@@ -20,6 +20,12 @@
 ## THE SOFTWARE.
 ##
 
+when not nimCoroutines and not defined(nimdoc):
+    when defined(noNimCoroutines):
+      {.error: "Coroutines can not be used with -d:noNimCoroutines"}
+    else:
+      {.error: "Coroutines require -d:nimCoroutines".}
+
 import posix, math
 
 proc GC_addStack(bottom: pointer) {.cdecl, importc.}
